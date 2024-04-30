@@ -1,22 +1,22 @@
-#define MAX 100
-typedef int tipoPilha;
-typedef struct {
-    tipoPilha topo; ///define o índice do tipo da pilha
-    int itens[MAX]; ///vetor com os itens da pilha
-} Pilha;
+typedef int tipoNodo;
+struct nodo {
+    tipoNodo item;
+    struct nodo *prox;
+};
+typedef struct nodo *Ptr;
+typedef tipoNodo tipoPilha;
+typedef Ptr Pilha;
 
 typedef struct {
     int x, y, visited;
 } Coords;
 
-void Init(Pilha *); ///inicializa a pilha
+void pdInit(Pilha *); ///inicializa a pilha dinâmica,
 
-int IsEmpty(Pilha); ///teste de pilha vazia
+int pdIsEmpty(Pilha); ///teste de pilha vazia
 
-int IsFull(Pilha); ///teste de pilha cheia
+void pdPush(Pilha *, tipoPilha); ///insere valor no topo da pilha
 
-void Push(Pilha *, int); ///insere valor no topo da pilha
+int pdTop(Pilha); ///retorna o topo da pilha, sem alterá-lo
 
-int Top(Pilha *); ///retorna o topo da pilha, sem alterá-lo
-
-int Pop(Pilha *P); ///retorna o topo da pilha, removendo-o da pilha
+int pdPop(Pilha *); ///retorna o topo da pilha, removendo-o da pilha

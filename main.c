@@ -74,8 +74,10 @@ int main()
     atual.x = checkpoint.x;
     atual.y = checkpoint.y;
 
-    Pilha p_movimentos;
-    Init(&p_movimentos);
+    Pilha teste;
+    pdInit(&teste);
+    pdPush(&teste, 2);
+    printf("\n%i\n", pdTop(teste));
 
     printf("\n%i\n", verif_esquerda(labirinto, &atual));
     printf("\n%i\n", verif_cima(labirinto, &atual));
@@ -83,28 +85,28 @@ int main()
     printf("\n%i\n", verif_baixo(labirinto, &atual));
 
 
-    while(atual.x != exit.x && atual.y != exit.y) {
+    /*while(atual.x != exit.x && atual.y != exit.y) {
         ///ordem: ESQUERDA -> CIMA -> DIREITA -> BAIXO
         if(labirinto[atual.x][atual.y-1] == '0') { ///VERIFICA SE DÁ PRA IR PRA ESQUERDA
-            Push(&p_movimentos, esquerda);
+            //Push(&p_movimentos, esquerda);
             atual.y--;
             labirinto[atual.x][atual.y] = 'R';
             labirinto[atual.x][atual.y+1] = '0';
         }
         else if(labirinto[atual.x-1][atual.y] == '0') { ///VERIFICA SE DÁ PRA IR PRA CIMA
-            Push(&p_movimentos, cima);
+            //Push(&p_movimentos, cima);
             atual.x--;
             labirinto[atual.x][atual.y] = 'R';
             labirinto[atual.x+1][atual.y] = '0';
         }
         else if(labirinto[atual.x][atual.y+1] == '0') { ///VERIFICA SE DÁ PRA IR PRA DIREITA
-            Push(&p_movimentos, direita);
+            //Push(&p_movimentos, direita);
             atual.y++;
             labirinto[atual.x][atual.y] = 'R';
             labirinto[atual.x][atual.y-1] = '0';
         }
         else if(labirinto[atual.x+1][atual.y] == '0') { ///VERIFICA SE DÁ PRA IR PRA BAIXO
-            Push(&p_movimentos, baixo);
+            //Push(&p_movimentos, baixo);
             atual.x++;
             labirinto[atual.x][atual.y] = 'R';
             labirinto[atual.x-1][atual.y] = '0';
@@ -112,7 +114,6 @@ int main()
         else if(labirinto[atual.x+1][atual.y] == 'S') {
             achou_saida();
         }
-    }
-    printf("\n\n");
+    }*/
     return 0;
 }
