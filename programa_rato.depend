@@ -1,9 +1,11 @@
 # depslib dependency file v1.0
-1714491594 source:d:\programas\programa_rato\main.c
+1714593613 source:d:\programas\programa_rato\main.c
 	<stdio.h>
 	<string.h>
 	<stdlib.h>
 	<stdbool.h>
+	<time.h>
+	<unistd.h>
 	"pilha.h"
 
 1714491608 source:d:\programas\programa_rato\pilha.c
@@ -11,5 +13,5 @@
 	<stdlib.h>
 	"pilha.h"
 
-1714491181 d:\programas\programa_rato\pilha.h
+1714494040 d:\programas\programa_rato\pilha.h
 
