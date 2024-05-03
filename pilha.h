@@ -8,8 +8,8 @@ typedef tipoNodo tipoPilha;
 typedef Ptr Pilha;
 
 typedef struct {
-    int x, y, dirEsquerda, dirCima, dirDireita, dirBaixo;
-} Coords;
+    int x, y;
+}Coords;
 
 void pdInit(Pilha *); ///inicializa a pilha dinâmica,
 

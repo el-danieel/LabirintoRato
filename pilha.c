@@ -10,9 +10,9 @@ int pdIsEmpty(Pilha Topo) {
     return (Topo == NULL);
 }
 
-void pdPush(Pilha *Topo, tipoPilha x){
+void pdPush(Pilha *Topo, tipoPilha x) {
     Pilha N;
-    if((N=(Pilha)malloc(sizeof(struct nodo)))== NULL){
+    if((N=(Pilha)malloc(sizeof(struct nodo))) == NULL) {
         puts("Erro na alocação de memória\n");
         exit(1);
     }
@@ -22,7 +22,7 @@ void pdPush(Pilha *Topo, tipoPilha x){
 }
 
 tipoPilha pdTop(Pilha Topo) {
-    if(pdIsEmpty(Topo)){
+    if(pdIsEmpty(Topo)) {
         puts("Erro: Pilha Vazia\n");
         exit(1);
     }
