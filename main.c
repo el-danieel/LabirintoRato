@@ -10,20 +10,20 @@
 #define DIREITA 2
 #define BAIXO 3
 
-int verif_esquerda(char Lab[][10], Coords *atual) { /// verificar se o bloco à esquerda é caminho livre ou parede
-    if(Lab[atual->x][atual->y-1] == '0') return 1;  /// retorna 1 se for caminho livre
-    else return 0;                                  /// retorna 0 se for parede
-}                                                   /// se aplica para os outros também
+int verif_esquerda(char Lab[][10], Coords *atual) {                                     /// verificar se o bloco à esquerda é caminho livre ou parede
+    if(Lab[atual->x][atual->y-1] != 'X' && Lab[atual->x][atual->y-1] != '#') return 1;  /// retorna 1 se for caminho livre
+    else return 0;                                                                      /// retorna 0 se for parede
+}                                                                                       /// se aplica para os outros também
 int verif_cima(char Lab[][10], Coords *atual) {
-    if(Lab[atual->x-1][atual->y] == '0') return 1;
+    if(Lab[atual->x-1][atual->y] != 'X' && Lab[atual->x-1][atual->y] != '#') return 1;
     else return 0;
 }
 int verif_direita(char Lab[][10], Coords *atual) {
-    if(Lab[atual->x][atual->y+1] == '0') return 1;
+    if(Lab[atual->x][atual->y+1] != 'X' && Lab[atual->x][atual->y+1] != '#') return 1;
     else return 0;
 }
 int verif_baixo(char Lab[][10], Coords *atual) {
-    if(Lab[atual->x+1][atual->y] == '0') return 1;
+    if(Lab[atual->x+1][atual->y] != 'X' && Lab[atual->x+1][atual->y] != '#') return 1;
     else return 0;
 }
 void printa_labirinto(char Lab[][10], int Linhas, int Colunas) { ///printa o labirinto.
@@ -33,6 +33,7 @@ void printa_labirinto(char Lab[][10], int Linhas, int Colunas) { ///printa o lab
             putchar(Lab[i][j]);
         }
     }
+    sleep(1);
 }
 int main()
 {
@@ -44,7 +45,7 @@ int main()
     char labirinto[14][10];
 
     int i, j, qtd_checkpoints = 4;
-    Coords init, exit, atual;
+    Coords init, Exit, atual;
 
     ///ler
     fgetc(arquivo);
@@ -56,8 +57,8 @@ int main()
                 init.y = j;
             }
             else if (labirinto[i][j] == 'S') {
-                exit.x = i; /// coordenadas
-                exit.y = j; /// da saida
+                Exit.x = i; /// coordenadas
+                Exit.y = j; /// da saida
             }
         }
     }
@@ -73,9 +74,8 @@ int main()
     int qtd_movimentos=0;  /// contagem dos checkpoints (inicia no 0,
                             /// se o rato chegar no proximo é incrementado, assim por diante
 
-    while(atual.x != exit.x && atual.y != exit.y) { /// execucao do labirinto
+    while(atual.x != Exit.x && atual.y != Exit.y) { /// execucao do labirinto
                                                     /// roda ate o rato achar a saida
-
         int randomDirecao; ///variavel que recebe a direcao aleatoria
         randomDirecao = rand() % 4; ///gera outra direcao caso a gerada seja igual a ultima (empilhada)
         int goLEFT = verif_esquerda(labirinto, &atual);                     /// verifica cada direcao
@@ -83,6 +83,10 @@ int main()
         int goRIGHT = verif_direita(labirinto, &atual);                     /// posicao atual do rato
         int goDOWN = verif_baixo(labirinto, &atual);
         int dir_anterior = goLEFT + goUP + goDOWN + goRIGHT;                /// se houverem 2 caminhos, o rato explora normal
+        if(dir_anterior>=2) {
+                labirinto[atual.x][atual.y] = 'C';
+                qtd_movimentos = 0;
+        }
         tipoPilha retrocede = -1;                                                 /// se houver apenas 1, ele deve retroceder (desempilhar)
         if(dir_anterior == 0) {
             while(qtd_movimentos != 0) {
@@ -95,8 +99,8 @@ int main()
                         else if (labirinto[atual.x][atual.y-1] == 'C') labirinto[atual.x][atual.y-1] = 'C';
                         else labirinto[atual.x][atual.y-1] = '#';
                         system("cls");
+                        printf("\nO RATO VOLTOU PARA DIREITA!\n");
                         printa_labirinto(labirinto, 14, 10);
-                        sleep(1);
                         qtd_movimentos--;
                     break;
                     case CIMA:
@@ -106,8 +110,8 @@ int main()
                         else if (labirinto[atual.x-1][atual.y] == 'C') labirinto[atual.x-1][atual.y] = 'C';
                         else labirinto[atual.x-1][atual.y] = '#';
                         system("cls");
+                        printf("\nO RATO VOLTOU PARA BAIXO!\n");
                         printa_labirinto(labirinto, 14, 10);
-                        sleep(1);
                         qtd_movimentos--;
                     break;
                     case DIREITA:
@@ -117,8 +121,8 @@ int main()
                         else if (labirinto[atual.x][atual.y+1] == 'C') labirinto[atual.x][atual.y+1] = 'C';
                         else labirinto[atual.x][atual.y+1] = '#';
                         system("cls");
+                        printf("\nO RATO VOLTOU PARA ESQUERDA!\n");
                         printa_labirinto(labirinto, 14, 10);
-                        sleep(1);
                         qtd_movimentos--;
                     break;
                     case BAIXO:
@@ -128,8 +132,8 @@ int main()
                         else if (labirinto[atual.x+1][atual.y] == 'C') labirinto[atual.x+1][atual.y] = 'C';
                         else labirinto[atual.x+1][atual.y] = '#';
                         system("cls");
+                        printf("\nO RATO VOLTOU PARA CIMA!\n");
                         printa_labirinto(labirinto, 14, 10);
-                        sleep(1);
                         qtd_movimentos--;
                     break;
                 }
@@ -146,16 +150,22 @@ int main()
                             if(verif_cima(labirinto, &atual) || verif_baixo(labirinto, &atual)) {
                                     labirinto[atual.x][atual.y] = 'C';
                                     qtd_movimentos = 1;
+                                    printf("\nO RATO ACHOU UM CHECKPOINT!\n");
+                                    sleep(1);
                             }
                             atual.y--;
+                            if(labirinto[atual.x][atual.y] == 'S') {
+                                printf("\nO RATO ACHOU A SAIDA!\n");
+                                return 0;
+                            }
                             labirinto[atual.x][atual.y] = 'R';
                             if(labirinto[atual.x][atual.y+1] == 'I')  labirinto[atual.x][atual.y+1] = 'I';
                             else if (labirinto[atual.x][atual.y+1] == 'C') labirinto[atual.x][atual.y+1] = 'C';
                             else labirinto[atual.x][atual.y+1] = '#';
                             pdPush(&pd_movimentos, ESQUERDA);
                             system("cls");
+                            printf("\nO RATO ANDOU PARA ESQUERDA!\n");
                             printa_labirinto(labirinto, 14, 10);
-                            sleep(1);
                         }
                     }
                 break;
@@ -167,6 +177,7 @@ int main()
                             if(verif_esquerda(labirinto, &atual) || verif_direita(labirinto, &atual)) {
                                     labirinto[atual.x][atual.y] = 'C';
                                     qtd_movimentos = 1;
+                                    printf("\nO RATO ACHOU UM CHECKPOINT!\n");
                             }
                             atual.x--;
                             labirinto[atual.x][atual.y] = 'R';
@@ -175,8 +186,8 @@ int main()
                             else labirinto[atual.x+1][atual.y] = '#';
                             pdPush(&pd_movimentos, CIMA);
                             system("cls");
+                            printf("\nO RATO ANDOU PARA CIMA!\n");
                             printa_labirinto(labirinto, 14, 10);
-                            sleep(1);
                         }
                     }
                 break;
@@ -188,6 +199,7 @@ int main()
                             if(verif_cima(labirinto, &atual) || verif_baixo(labirinto, &atual)) { /// DEFINIÇÃO DE CHECKPOINT APENAS A CADA ITERAÇÃO
                                     labirinto[atual.x][atual.y] = 'C';                            /// SEM ITERAÇÃO, SEM CHECKPOINT
                                     qtd_movimentos = 1;                                           /// TA BUGANDO NA LINHA 6, COLUNA 7
+                                    printf("\nO RATO ACHOU UM CHECKPOINT!\n");
                             }                                                                     /// POIS ELE NAO ANDAR JA Q A PROXIMA EH PAREDE
                             atual.y++;                                                            /// FAZER VERIFICACAO DE CHECKPOINT ANTES DA ITERACAO
                             labirinto[atual.x][atual.y] = 'R';                                    /// (SE EH Q EH POSSIVEL) AMANHA VEJO ISSO !
@@ -196,8 +208,8 @@ int main()
                             else labirinto[atual.x][atual.y-1] = '#';
                             pdPush(&pd_movimentos, DIREITA);
                             system("cls");
+                            printf("\nO RATO ANDOU PARA DIREITA!\n");
                             printa_labirinto(labirinto, 14, 10);
-                            sleep(1);
                         }
                     }
                 break;
@@ -209,6 +221,7 @@ int main()
                             if(verif_esquerda(labirinto, &atual) || verif_direita(labirinto, &atual)) {
                                     labirinto[atual.x][atual.y] = 'C';
                                     qtd_movimentos = 1;
+                                    printf("\nO RATO ACHOU UM CHECKPOINT!\n");
                             }
                             atual.x++;
                             labirinto[atual.x][atual.y] = 'R';
@@ -217,8 +230,8 @@ int main()
                             else labirinto[atual.x-1][atual.y] = '#';
                             pdPush(&pd_movimentos, BAIXO);
                             system("cls");
+                            printf("\nO RATO ANDOU PARA BAIXO!\n");
                             printa_labirinto(labirinto, 14, 10);
-                            sleep(1);
                         }
                     }
                 break;
