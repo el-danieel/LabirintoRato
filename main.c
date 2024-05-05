@@ -219,16 +219,16 @@ int main()
     int qtd_movimentos=0;  /// contagem dos checkpoints (inicia no 0,
                             /// se o rato chegar no proximo é incrementado, assim por diante
 
-    while(labirinto[atual.x][atual.y] != 'S') { /// execucao do labirinto
-                                                    /// roda ate o rato achar a saida
-        int randomDirecao; ///variavel que recebe a direcao aleatoria
-        randomDirecao = rand() % 4; ///gera outra direcao caso a gerada seja igual a ultima (empilhada)
-        int goLEFT = verif_esquerda(labirinto, &atual);                     /// verifica cada direcao
-        int goUP = verif_cima(labirinto, &atual);                           /// disponivel a partir da
-        int goRIGHT = verif_direita(labirinto, &atual);                     /// posicao atual do rato
+    while(labirinto[atual.x][atual.y] != 'S') {                         /// roda ate o rato achar a saida
+
+        int randomDirecao;                                              /// variavel que recebe a direcao aleatoria
+        randomDirecao = rand() % 4;
+        int goLEFT = verif_esquerda(labirinto, &atual);                 /// verifica cada direcao
+        int goUP = verif_cima(labirinto, &atual);                       /// disponivel a partir da
+        int goRIGHT = verif_direita(labirinto, &atual);                 /// posicao atual do rato
         int goDOWN = verif_baixo(labirinto, &atual);
         int dir_anterior = goLEFT + goUP + goDOWN + goRIGHT;                /// se houverem 2 caminhos, o rato explora normal
-        if(dir_anterior>=2) {
+        if(atual.x != init.x && atual.y != init.y && dir_anterior>=2) {
                 labirinto[atual.x][atual.y] = 'C';
                 qtd_movimentos = 0;
         }
@@ -239,9 +239,9 @@ int main()
                 switch(retrocede) {
                     case ESQUERDA:
                         atual.y++;
-                        labirinto[atual.x][atual.y] = 'R';
-                        if(labirinto[atual.x][atual.y-1] == 'I')  labirinto[atual.x][atual.y-1] = 'I';
-                        else if (labirinto[atual.x][atual.y-1] == 'C') labirinto[atual.x][atual.y-1] = 'C';
+                        if(labirinto[atual.x][atual.y] == 'C') labirinto[atual.x][atual.y] = 'C'; ///para manter o C no mapa
+                        else labirinto[atual.x][atual.y] = 'R';
+                        if (labirinto[atual.x][atual.y-1] == 'C') labirinto[atual.x][atual.y-1] = 'C';
                         else labirinto[atual.x][atual.y-1] = '#';
                         system("cls");
                         printf("\nO RATO VOLTOU PARA DIREITA!\n");
@@ -250,9 +250,9 @@ int main()
                     break;
                     case CIMA:
                         atual.x++;
-                        labirinto[atual.x][atual.y] = 'R';
-                        if(labirinto[atual.x-1][atual.y] == 'I')  labirinto[atual.x-1][atual.y] = 'I';
-                        else if (labirinto[atual.x-1][atual.y] == 'C') labirinto[atual.x-1][atual.y] = 'C';
+                        if(labirinto[atual.x][atual.y] == 'C') labirinto[atual.x][atual.y] = 'C'; ///para manter o C no mapa
+                        else labirinto[atual.x][atual.y] = 'R';
+                        if (labirinto[atual.x-1][atual.y] == 'C') labirinto[atual.x-1][atual.y] = 'C';
                         else labirinto[atual.x-1][atual.y] = '#';
                         system("cls");
                         printf("\nO RATO VOLTOU PARA BAIXO!\n");
@@ -261,10 +261,10 @@ int main()
                     break;
                     case DIREITA:
                         atual.y--;
-                        if(labirinto[atual.x][atual.y+1] == 'I') labirinto[atual.x][atual.y+1] = 'I';
-                        else if (labirinto[atual.x][atual.y+1] == 'C') labirinto[atual.x][atual.y+1] = 'C';
+                        if(labirinto[atual.x][atual.y] == 'C') labirinto[atual.x][atual.y] = 'C'; ///para manter o C no mapa
+                        else labirinto[atual.x][atual.y] = 'R';
+                        if (labirinto[atual.x][atual.y+1] == 'C') labirinto[atual.x][atual.y+1] = 'C';
                         else labirinto[atual.x][atual.y+1] = '#';
-                        labirinto[atual.x][atual.y] = 'R';
                         system("cls");
                         printf("\nO RATO VOLTOU PARA ESQUERDA!\n");
                         printa_labirinto(labirinto, linhas, colunas);
@@ -272,9 +272,9 @@ int main()
                     break;
                     case BAIXO:
                         atual.x--;
-                        labirinto[atual.x][atual.y] = 'R';
-                        if(labirinto[atual.x+1][atual.y] == 'I')  labirinto[atual.x+1][atual.y] = 'I';
-                        else if (labirinto[atual.x+1][atual.y] == 'C') labirinto[atual.x+1][atual.y] = 'C';
+                        if(labirinto[atual.x][atual.y] == 'C') labirinto[atual.x][atual.y] = 'C'; ///para manter o C no mapa
+                        else labirinto[atual.x][atual.y] = 'R';
+                        if (labirinto[atual.x+1][atual.y] == 'C') labirinto[atual.x+1][atual.y] = 'C';
                         else labirinto[atual.x+1][atual.y] = '#';
                         system("cls");
                         printf("\nO RATO VOLTOU PARA CIMA!\n");
@@ -291,7 +291,6 @@ int main()
                     if(goLEFT == 1) {
                         while(labirinto[atual.x][atual.y-1] != 'X' && labirinto[atual.x][atual.y-1] != '#') {
                             qtd_movimentos++;
-                            if(atual.x == init.x && atual.y == init.y) labirinto[atual.x][atual.y] = 'I';
                             if(verif_cima(labirinto, &atual) || verif_baixo(labirinto, &atual)) {
                                     labirinto[atual.x][atual.y] = 'C';
                                     qtd_movimentos = 1;
@@ -299,11 +298,14 @@ int main()
                                     sleep(1);
                             }
                             atual.y--;
-                            verif_saida(labirinto, &atual, &init, &pd_movimentos);
-                            labirinto[atual.x][atual.y] = 'R';
-                            if(labirinto[atual.x][atual.y+1] == 'I')  labirinto[atual.x][atual.y+1] = 'I';
-                            else if (labirinto[atual.x][atual.y+1] == 'C') labirinto[atual.x][atual.y+1] = 'C';
+                            if(labirinto[atual.x][atual.y] == 'S') {
+                                printf("\nO RATO ACHOU A SAIDA!\n");
+                                exit(1);
+                            }
+                            if (labirinto[atual.x][atual.y+1] == 'C') labirinto[atual.x][atual.y+1] = 'C';
+                            else if (labirinto[atual.x][atual.y+1] == labirinto[init.x][init.y]) labirinto[atual.x][atual.y+1] = '0';
                             else labirinto[atual.x][atual.y+1] = '#';
+                            labirinto[atual.x][atual.y] = 'R';
                             pdPush(&pd_movimentos, ESQUERDA);
                             system("cls");
                             printf("\nO RATO ANDOU PARA ESQUERDA!\n");
@@ -315,7 +317,6 @@ int main()
                     if(goUP == 1) {
                         while(labirinto[atual.x-1][atual.y] != 'X' && labirinto[atual.x-1][atual.y] != '#') {
                             qtd_movimentos++;
-                            if(atual.x == init.x && atual.y == init.y) labirinto[atual.x][atual.y] = 'I';
                             if(verif_esquerda(labirinto, &atual) || verif_direita(labirinto, &atual)) {
                                     labirinto[atual.x][atual.y] = 'C';
                                     qtd_movimentos = 1;
@@ -324,11 +325,11 @@ int main()
                             atual.x--;
                             if(labirinto[atual.x][atual.y] == 'S') {
                                 printf("\nO RATO ACHOU A SAIDA!\n");
-                                return 0;
+                                exit(1);
                             }
                             labirinto[atual.x][atual.y] = 'R';
-                            if(labirinto[atual.x+1][atual.y] == 'I') labirinto[atual.x+1][atual.y] = 'I';
-                            else if (labirinto[atual.x+1][atual.y] == 'C') labirinto[atual.x+1][atual.y] = 'C';
+                            if (labirinto[atual.x+1][atual.y] == 'C') labirinto[atual.x+1][atual.y] = 'C';
+                            else if (labirinto[atual.x+1][atual.y] == labirinto[init.x][init.y]) labirinto[atual.x+1][atual.y] = '0';
                             else labirinto[atual.x+1][atual.y] = '#';
                             pdPush(&pd_movimentos, CIMA);
                             system("cls");
@@ -341,20 +342,19 @@ int main()
                     if(goRIGHT == 1) {
                         while(labirinto[atual.x][atual.y+1] != 'X' && labirinto[atual.x][atual.y+1] != '#'){
                             qtd_movimentos++;
-                            if(atual.x == init.x && atual.y == init.y) labirinto[atual.x][atual.y] = 'I';
-                            if(verif_cima(labirinto, &atual) || verif_baixo(labirinto, &atual)) { /// DEFINIÇÃO DE CHECKPOINT APENAS A CADA ITERAÇÃO
-                                    labirinto[atual.x][atual.y] = 'C';                            /// SEM ITERAÇÃO, SEM CHECKPOINT
-                                    qtd_movimentos = 1;                                           /// TA BUGANDO NA LINHA 6, COLUNA 7
+                            if(verif_cima(labirinto, &atual) || verif_baixo(labirinto, &atual)) {
+                                    labirinto[atual.x][atual.y] = 'C';
+                                    qtd_movimentos = 1;
                                     printf("\nO RATO ACHOU UM CHECKPOINT!\n");
-                            }                                                                     /// POIS ELE NAO ANDAR JA Q A PROXIMA EH PAREDE
-                            atual.y++;                                                            /// FAZER VERIFICACAO DE CHECKPOINT ANTES DA ITERACAO
+                            }
+                            atual.y++;
                             if(labirinto[atual.x][atual.y] == 'S') {
                                 printf("\nO RATO ACHOU A SAIDA!\n");
-                                return 0;
+                                exit(1);
                             }
-                            labirinto[atual.x][atual.y] = 'R';                                    /// (SE EH Q EH POSSIVEL) AMANHA VEJO ISSO !
-                            if(labirinto[atual.x][atual.y-1] == 'I')  labirinto[atual.x][atual.y-1] = 'I';
-                            else if (labirinto[atual.x][atual.y-1] == 'C') labirinto[atual.x][atual.y-1] = 'C';
+                            labirinto[atual.x][atual.y] = 'R';
+                            if (labirinto[atual.x][atual.y-1] == 'C') labirinto[atual.x][atual.y-1] = 'C';
+                            else if (labirinto[atual.x][atual.y-1] == labirinto[init.x][init.y]) labirinto[atual.x][atual.y-1] = '0';
                             else labirinto[atual.x][atual.y-1] = '#';
                             pdPush(&pd_movimentos, DIREITA);
                             system("cls");
@@ -367,7 +367,6 @@ int main()
                     if(goDOWN == 1) {
                         while(labirinto[atual.x+1][atual.y] != 'X' && labirinto[atual.x+1][atual.y] != '#') {
                             qtd_movimentos++;
-                            if(atual.x == init.x && atual.y == init.y) labirinto[atual.x][atual.y] = 'I';
                             if(verif_esquerda(labirinto, &atual) || verif_direita(labirinto, &atual)) {
                                     labirinto[atual.x][atual.y] = 'C';
                                     qtd_movimentos = 1;
@@ -376,11 +375,11 @@ int main()
                             atual.x++;
                             if(labirinto[atual.x][atual.y] == 'S') {
                                 printf("\nO RATO ACHOU A SAIDA!\n");
-                                return 0;
+                                exit(1);
                             }
                             labirinto[atual.x][atual.y] = 'R';
-                            if(labirinto[atual.x-1][atual.y] == 'I')  labirinto[atual.x-1][atual.y] = 'I';
-                            else if (labirinto[atual.x-1][atual.y] == 'C') labirinto[atual.x-1][atual.y] = 'C';
+                            if (labirinto[atual.x-1][atual.y] == 'C') labirinto[atual.x-1][atual.y] = 'C';
+                            else if (labirinto[atual.x-1][atual.y] == labirinto[init.x-1][init.y]) labirinto[atual.x][atual.y] = '0';
                             else labirinto[atual.x-1][atual.y] = '#';
                             pdPush(&pd_movimentos, BAIXO);
                             system("cls");
