@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1714879402 source:d:\programas\programa_rato\main.c
+1714919197 source:d:\programas\programa_rato\main.c
 	<stdio.h>
 	<string.h>
 	<stdlib.h>

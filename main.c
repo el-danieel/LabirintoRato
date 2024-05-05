@@ -11,48 +11,15 @@
 #define DIREITA 2
 #define BAIXO 3
 
-int verif_esquerda(char **Lab, Coords *atual) {                                     /// verificar se o bloco à esquerda é caminho livre ou parede
-    if(Lab[atual->x][atual->y-1] != 'X' && Lab[atual->x][atual->y-1] != '#') return 1;  /// retorna 1 se for caminho livre
-    else return 0;                                                                      /// retorna 0 se for parede
-}                                                                                       /// se aplica para os outros também
-int verif_cima(char **Lab, Coords *atual) {
-    if(Lab[atual->x-1][atual->y] != 'X' && Lab[atual->x-1][atual->y] != '#') return 1;
-    else return 0;
-}
-int verif_direita(char **Lab, Coords *atual) {
-    if(Lab[atual->x][atual->y+1] != 'X' && Lab[atual->x][atual->y+1] != '#') return 1;
-    else return 0;
-}
-int verif_baixo(char **Lab, Coords *atual) {
-    if(Lab[atual->x+1][atual->y] != 'X' && Lab[atual->x+1][atual->y] != '#') return 1;
+int verif_direcao(char **Lab, int x, int y, int direcao) {
+    if(direcao == ESQUERDA) y--;
+    else if (direcao == CIMA) x--;
+    else if (direcao == DIREITA) y++;
+    else x++;
+    if(Lab[x][y] != 'X' && Lab[x][y] != '#') return 1;
     else return 0;
 }
 
-void verif_saida(char **Lab, Coords *atual, Coords *init, Pilha *pd) {
-    if(Lab[atual->x][atual->y] == 'S') {
-        printf("\nO RATO ACHOU A SAIDA!\n");
-        printf("Caminho seguido pelo rato a partir da posição inicial Linha[%i] Coluna[%i]\n", init->x, init->y);
-        while(!pdIsEmpty) {
-            int caminho = pdPop(&pd);
-            switch(caminho) {
-                case ESQUERDA:
-                    printf("ESQUERDA <- ");
-                break;
-                case CIMA:
-                    printf("CIMA <- ");
-                    break;
-                case DIREITA:
-                    printf("DIREITA <- ");
-                    break;
-                case BAIXO:
-                    printf("BAIXO <- ");
-                break;
-            }
-
-        }
-    }
-    exit(1);
-}
 void printa_labirinto(char **Lab, int Linhas, int Colunas) { ///printa o labirinto.
     int i, j;
     for (i=0; i<Linhas; i++) {
@@ -62,6 +29,68 @@ void printa_labirinto(char **Lab, int Linhas, int Colunas) { ///printa o labirin
         printf("\n");
     }
     sleep(1);
+}
+
+void rato_anda(char **labirinto, Coords *atual, Coords *init, Coords *saida, int direcao, int linhas, int colunas) {
+    int x_anterior = atual->x, y_anterior = atual->y;
+    if(direcao == ESQUERDA) atual->y--;
+    else if(direcao == CIMA) atual->x--;
+    else if(direcao == DIREITA) atual->y++;
+    else atual->x++;
+    verif_saida(atual->x, atual->y, saida->x, saida->y);
+        if(verif_checkpoint(labirinto, atual->x, atual->y) == 1) {
+            labirinto[atual->x][atual->y] = 'C';
+            printf("\nO RATO ACHOU UM CHECKPOINT!\n");
+            sleep(1);
+        }
+        if (labirinto[x_anterior][y_anterior] == 'C') labirinto[x_anterior][y_anterior] = 'C';
+        else if (labirinto[x_anterior][y_anterior] == labirinto[init->x][init->y]) labirinto[x_anterior][y_anterior] = '0';
+        else labirinto[x_anterior][y_anterior] = '#';
+        if (labirinto[atual->x][atual->y] != 'C') labirinto[atual->x][atual->y] = 'R';
+
+        system("cls");
+        printf("ESQUERDA = %i\n", ESQUERDA);
+        printf("CIMA = %i\n", CIMA);
+        printf("DIREITA = %i\n", DIREITA);
+        printf("BAIXO = %i\n", BAIXO);
+        printf("\nO RATO ANDOU PARA %i!\n", direcao);
+        printa_labirinto(labirinto, linhas, colunas);
+
+}
+
+void rato_volta(char **labirinto, Coords *atual, int direcao, int linhas, int colunas) {
+    int x_anterior = atual->x, y_anterior = atual->y;
+    if(direcao == ESQUERDA) atual->y++;
+    else if(direcao == CIMA) atual->x++;
+    else if(direcao == DIREITA) atual->y--;
+    else atual->x--;
+    if(labirinto[atual->x][atual->y] == 'C') labirinto[atual->x][atual->y] = 'C'; ///para manter o C no mapa
+    else labirinto[atual->x][atual->y] = 'R';
+    if (labirinto[x_anterior][y_anterior] == 'C') labirinto[x_anterior][y_anterior] = 'C';
+    else labirinto[x_anterior][y_anterior] = '#';
+    system("cls");
+    printf("ESQUERDA = %i\n", ESQUERDA);
+    printf("CIMA = %i\n", CIMA);
+    printf("DIREITA = %i\n", DIREITA);
+    printf("BAIXO = %i\n", BAIXO);
+    printf("\nO RATO VOLTOU PARA %i!\n", direcao);
+    printa_labirinto(labirinto, linhas, colunas);
+}
+
+int verif_checkpoint(char **labirinto, int x, int y) {
+    int caminho_livre = 0, i;
+    for(i = 0; i < 4; i++) {
+        if(verif_direcao(labirinto, x, y, i)) caminho_livre++;
+    }
+    if (caminho_livre > 2) return 1;
+    else return 0;
+}
+
+void verif_saida(int xAtual, int yAtual, int xSaida, int ySaida) {
+    if(xAtual == xSaida && yAtual == ySaida) {
+        printf("\nO RATO ACHOU A SAIDA!\n");
+        return;
+    }
 }
 int main()
 {
@@ -178,7 +207,11 @@ int main()
             }
 
                 /// Aumentando o numero de saidas
-            if(Linha[0] == 'S') qtSaidas++;
+            if(Linha[0] == 'S') {
+                saida.x = k;
+                saida.y = 0;
+                qtSaidas++;
+            }
             if(Linha[colunas-1] == 'S') qtSaidas++;
         }
         for (int j = 0; j < colunas; j++) {
@@ -212,188 +245,60 @@ int main()
     atual.x = init.x;
     atual.y = init.y;
 
+    Pilha pd_movimentos; /// PILHA COM OS MOVIMENTOS DO RATO
+    pdInit(&pd_movimentos);
+    srand(time(NULL));
+    int qtd_movimentos=0; /// INDICE DE MOVIMENTOS, USADO PARA RETROCEDER A QUANTIDADE CERTA
 
-    Pilha pd_movimentos;    /// pilha de movimentos
-    pdInit(&pd_movimentos); /// empilha valores como '0' '1', que se referem aos movimentos como definidos no inicio
-    srand(time(NULL));      /// iniciando geracao de numero aleatorio
-    int qtd_movimentos=0;  /// contagem dos checkpoints (inicia no 0,
-                            /// se o rato chegar no proximo é incrementado, assim por diante
 
-    while(labirinto[atual.x][atual.y] != 'S') {                         /// roda ate o rato achar a saida
-
-        int randomDirecao;                                              /// variavel que recebe a direcao aleatoria
-        randomDirecao = rand() % 4;
-        int goLEFT = verif_esquerda(labirinto, &atual);                 /// verifica cada direcao
-        int goUP = verif_cima(labirinto, &atual);                       /// disponivel a partir da
-        int goRIGHT = verif_direita(labirinto, &atual);                 /// posicao atual do rato
-        int goDOWN = verif_baixo(labirinto, &atual);
-        int dir_anterior = goLEFT + goUP + goDOWN + goRIGHT;                /// se houverem 2 caminhos, o rato explora normal
-        if(atual.x != init.x && atual.y != init.y && dir_anterior>=2) {
+    while(1) {
+        int randomDirecao, caminho_livre = 0, i;
+        randomDirecao = rand() % 4; /// DIRECAO ALEATORIA
+        for(i = 0; i < 4; i++) {
+            if(verif_direcao(labirinto, atual.x, atual.y, i)) caminho_livre++; ///VEFIFICA CAMINHOS LIVRES
+        }
+        if(atual.x != init.x && atual.y != init.y && caminho_livre>=2) { ///VERIFICA CHECKPOINT NA POSICAO ATUAL ANTES DO LOOP
                 labirinto[atual.x][atual.y] = 'C';
                 qtd_movimentos = 0;
         }
-        tipoPilha retrocede = -1;                                                 /// se houver apenas 1, ele deve retroceder (desempilhar)
-        if(dir_anterior == 0) {
+
+        tipoPilha retrocede = -1;
+        /// DESEMPILHANDO
+        if(caminho_livre == 0) { ///SE NAO TIVER PARA ONDE IR, DESEMPILHA E RETROCEDE
             while(qtd_movimentos != 0) {
                 if(pdIsEmpty(pd_movimentos) == 0) retrocede = pdPop(&pd_movimentos);
-                switch(retrocede) {
-                    case ESQUERDA:
-                        atual.y++;
-                        if(labirinto[atual.x][atual.y] == 'C') labirinto[atual.x][atual.y] = 'C'; ///para manter o C no mapa
-                        else labirinto[atual.x][atual.y] = 'R';
-                        if (labirinto[atual.x][atual.y-1] == 'C') labirinto[atual.x][atual.y-1] = 'C';
-                        else labirinto[atual.x][atual.y-1] = '#';
-                        system("cls");
-                        printf("\nO RATO VOLTOU PARA DIREITA!\n");
-                        printa_labirinto(labirinto, linhas, colunas);
-                        qtd_movimentos--;
-                    break;
-                    case CIMA:
-                        atual.x++;
-                        if(labirinto[atual.x][atual.y] == 'C') labirinto[atual.x][atual.y] = 'C'; ///para manter o C no mapa
-                        else labirinto[atual.x][atual.y] = 'R';
-                        if (labirinto[atual.x-1][atual.y] == 'C') labirinto[atual.x-1][atual.y] = 'C';
-                        else labirinto[atual.x-1][atual.y] = '#';
-                        system("cls");
-                        printf("\nO RATO VOLTOU PARA BAIXO!\n");
-                        printa_labirinto(labirinto, linhas, colunas);
-                        qtd_movimentos--;
-                    break;
-                    case DIREITA:
-                        atual.y--;
-                        if(labirinto[atual.x][atual.y] == 'C') labirinto[atual.x][atual.y] = 'C'; ///para manter o C no mapa
-                        else labirinto[atual.x][atual.y] = 'R';
-                        if (labirinto[atual.x][atual.y+1] == 'C') labirinto[atual.x][atual.y+1] = 'C';
-                        else labirinto[atual.x][atual.y+1] = '#';
-                        system("cls");
-                        printf("\nO RATO VOLTOU PARA ESQUERDA!\n");
-                        printa_labirinto(labirinto, linhas, colunas);
-                        qtd_movimentos--;
-                    break;
-                    case BAIXO:
-                        atual.x--;
-                        if(labirinto[atual.x][atual.y] == 'C') labirinto[atual.x][atual.y] = 'C'; ///para manter o C no mapa
-                        else labirinto[atual.x][atual.y] = 'R';
-                        if (labirinto[atual.x+1][atual.y] == 'C') labirinto[atual.x+1][atual.y] = 'C';
-                        else labirinto[atual.x+1][atual.y] = '#';
-                        system("cls");
-                        printf("\nO RATO VOLTOU PARA CIMA!\n");
-                        printa_labirinto(labirinto, linhas, colunas);
-                        qtd_movimentos--;
-                    break;
-                }
-            }
-        }                           /// fim bloco desempilhando
-                                    /// se nao for desempilhar, rato explora como abaixo:
-        else {
-            switch (randomDirecao) {    /// switch com comandos para cada direção gerada
-                case ESQUERDA:
-                    if(goLEFT == 1) {
-                        while(labirinto[atual.x][atual.y-1] != 'X' && labirinto[atual.x][atual.y-1] != '#') {
-                            qtd_movimentos++;
-                            if(verif_cima(labirinto, &atual) || verif_baixo(labirinto, &atual)) {
-                                    labirinto[atual.x][atual.y] = 'C';
-                                    qtd_movimentos = 1;
-                                    printf("\nO RATO ACHOU UM CHECKPOINT!\n");
-                                    sleep(1);
-                            }
-                            atual.y--;
-                            if(labirinto[atual.x][atual.y] == 'S') {
-                                printf("\nO RATO ACHOU A SAIDA!\n");
-                                exit(1);
-                            }
-                            if (labirinto[atual.x][atual.y+1] == 'C') labirinto[atual.x][atual.y+1] = 'C';
-                            else if (labirinto[atual.x][atual.y+1] == labirinto[init.x][init.y]) labirinto[atual.x][atual.y+1] = '0';
-                            else labirinto[atual.x][atual.y+1] = '#';
-                            labirinto[atual.x][atual.y] = 'R';
-                            pdPush(&pd_movimentos, ESQUERDA);
-                            system("cls");
-                            printf("\nO RATO ANDOU PARA ESQUERDA!\n");
-                            printa_labirinto(labirinto, linhas, colunas);
-                        }
-                    }
-                break;
-                case CIMA:
-                    if(goUP == 1) {
-                        while(labirinto[atual.x-1][atual.y] != 'X' && labirinto[atual.x-1][atual.y] != '#') {
-                            qtd_movimentos++;
-                            if(verif_esquerda(labirinto, &atual) || verif_direita(labirinto, &atual)) {
-                                    labirinto[atual.x][atual.y] = 'C';
-                                    qtd_movimentos = 1;
-                                    printf("\nO RATO ACHOU UM CHECKPOINT!\n");
-                            }
-                            atual.x--;
-                            if(labirinto[atual.x][atual.y] == 'S') {
-                                printf("\nO RATO ACHOU A SAIDA!\n");
-                                exit(1);
-                            }
-                            labirinto[atual.x][atual.y] = 'R';
-                            if (labirinto[atual.x+1][atual.y] == 'C') labirinto[atual.x+1][atual.y] = 'C';
-                            else if (labirinto[atual.x+1][atual.y] == labirinto[init.x][init.y]) labirinto[atual.x+1][atual.y] = '0';
-                            else labirinto[atual.x+1][atual.y] = '#';
-                            pdPush(&pd_movimentos, CIMA);
-                            system("cls");
-                            printf("\nO RATO ANDOU PARA CIMA!\n");
-                            printa_labirinto(labirinto, linhas, colunas);
-                        }
-                    }
-                break;
-                case DIREITA:
-                    if(goRIGHT == 1) {
-                        while(labirinto[atual.x][atual.y+1] != 'X' && labirinto[atual.x][atual.y+1] != '#'){
-                            qtd_movimentos++;
-                            if(verif_cima(labirinto, &atual) || verif_baixo(labirinto, &atual)) {
-                                    labirinto[atual.x][atual.y] = 'C';
-                                    qtd_movimentos = 1;
-                                    printf("\nO RATO ACHOU UM CHECKPOINT!\n");
-                            }
-                            atual.y++;
-                            if(labirinto[atual.x][atual.y] == 'S') {
-                                printf("\nO RATO ACHOU A SAIDA!\n");
-                                exit(1);
-                            }
-                            labirinto[atual.x][atual.y] = 'R';
-                            if (labirinto[atual.x][atual.y-1] == 'C') labirinto[atual.x][atual.y-1] = 'C';
-                            else if (labirinto[atual.x][atual.y-1] == labirinto[init.x][init.y]) labirinto[atual.x][atual.y-1] = '0';
-                            else labirinto[atual.x][atual.y-1] = '#';
-                            pdPush(&pd_movimentos, DIREITA);
-                            system("cls");
-                            printf("\nO RATO ANDOU PARA DIREITA!\n");
-                            printa_labirinto(labirinto, linhas, colunas);
-                        }
-                    }
-                break;
-                case BAIXO:
-                    if(goDOWN == 1) {
-                        while(labirinto[atual.x+1][atual.y] != 'X' && labirinto[atual.x+1][atual.y] != '#') {
-                            qtd_movimentos++;
-                            if(verif_esquerda(labirinto, &atual) || verif_direita(labirinto, &atual)) {
-                                    labirinto[atual.x][atual.y] = 'C';
-                                    qtd_movimentos = 1;
-                                    printf("\nO RATO ACHOU UM CHECKPOINT!\n");
-                            }
-                            atual.x++;
-                            if(labirinto[atual.x][atual.y] == 'S') {
-                                printf("\nO RATO ACHOU A SAIDA!\n");
-                                exit(1);
-                            }
-                            labirinto[atual.x][atual.y] = 'R';
-                            if (labirinto[atual.x-1][atual.y] == 'C') labirinto[atual.x-1][atual.y] = 'C';
-                            else if (labirinto[atual.x-1][atual.y] == labirinto[init.x-1][init.y]) labirinto[atual.x][atual.y] = '0';
-                            else labirinto[atual.x-1][atual.y] = '#';
-                            pdPush(&pd_movimentos, BAIXO);
-                            system("cls");
-                            printf("\nO RATO ANDOU PARA BAIXO!\n");
-                            printa_labirinto(labirinto, linhas, colunas);
-                        }
-                    }
-                break;
+                rato_volta(labirinto, &atual, retrocede, linhas, colunas);
+                qtd_movimentos--;
             }
         }
+        /// EMPILHANDO
+        else {
+            if(verif_direcao(labirinto, atual.x, atual.y, randomDirecao)) {
+                while(verif_direcao(labirinto, atual.x, atual.y, randomDirecao)) {
+                    qtd_movimentos++;
+                    rato_anda(labirinto, &atual, &init, &saida, randomDirecao, linhas, colunas);
+                    if(atual.x == saida.x && atual.y == saida.y) break; ///encerra se estiver na saida
+                    if(labirinto[atual.x][atual.y] == 'C') qtd_movimentos = 0;
+                    pdPush(&pd_movimentos, randomDirecao);
+                }
+                if(atual.x == saida.x && atual.y == saida.y) break; ///encerra se estiver na saida
+            }
+            if(atual.x == saida.x && atual.y == saida.y) break; ///encerra se estiver na saida
+        }
+        if(atual.x == saida.x && atual.y == saida.y) break; ///encerra se estiver na saida
     }
     for (int i = 0; i < linhas; i++) {
         free(labirinto[i]);
     }
     free(labirinto);
+    system("cls");
+    printf("Caminho percorrido a partir da posicao inicial [%i][%i]: \n", init.x, init.y);
+    printf("ESQUERDA = %i\n", ESQUERDA);
+    printf("CIMA = %i\n", CIMA);
+    printf("DIREITA = %i\n", DIREITA);
+    printf("BAIXO = %i\n", BAIXO);
+    while(!pdIsEmpty(pd_movimentos)) {
+        printf("%i <- ", pdPop(&pd_movimentos));
+    }
     return 0;
 }
